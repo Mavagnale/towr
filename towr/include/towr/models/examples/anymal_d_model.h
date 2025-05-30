@@ -27,47 +27,46 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ******************************************************************************/
 
-#include <towr/models/robot_model.h>
+#ifndef TOWR_TOWR_ROS_INCLUDE_TOWR_ROS_ANYMAL_D_MODEL_H_
+#define TOWR_TOWR_ROS_INCLUDE_TOWR_ROS_ANYMAL_D_MODEL_H_
 
-#include <towr/models/examples/monoped_model.h>
-#include <towr/models/examples/biped_model.h>
-#include <towr/models/examples/hyq_model.h>
-#include <towr/models/examples/anymal_model.h>
-#include <towr/models/examples/anymal_d_model.h>
+#include <towr/models/kinematic_model.h>
+#include <towr/models/single_rigid_body_dynamics.h>
+#include <towr/models/endeffector_mappings.h>
 
 namespace towr {
 
+/**
+ * @brief The Kinematics of the quadruped robot ANYmal D.
+ */
+class AnymalDKinematicModel : public KinematicModel {
+public:
+  AnymalDKinematicModel () : KinematicModel(4)
+  {
+    const double x_nominal_b = 0.507838;
+    const double y_nominal_b = 0.318212;
+    const double z_nominal_b = -0.50;
 
-RobotModel::RobotModel(Robot robot)
-{
-  switch (robot) {
-    case Monoped:
-      dynamic_model_   = std::make_shared<MonopedDynamicModel>();
-      kinematic_model_ = std::make_shared<MonopedKinematicModel>();
-      break;
-    case Biped:
-      dynamic_model_   = std::make_shared<BipedDynamicModel>();
-      kinematic_model_ = std::make_shared<BipedKinematicModel>();
-      break;
-    case Hyq:
-      dynamic_model_   = std::make_shared<HyqDynamicModel>();
-      kinematic_model_ = std::make_shared<HyqKinematicModel>();
-      break;
-    case Anymal:
-      dynamic_model_   = std::make_shared<AnymalDynamicModel>();
-      kinematic_model_ = std::make_shared<AnymalKinematicModel>();
-      break;
-    case AnymalD:
-      dynamic_model_   = std::make_shared<AnymalDDynamicModel>();
-      kinematic_model_ = std::make_shared<AnymalDKinematicModel>();
-      break;      
-    default:
-      assert(false); // Error: Robot model not implemented.
-      break;
+    nominal_stance_.at(LF) <<  x_nominal_b,   y_nominal_b, z_nominal_b;
+    nominal_stance_.at(RF) <<  x_nominal_b,  -y_nominal_b, z_nominal_b;
+    nominal_stance_.at(LH) << -x_nominal_b,   y_nominal_b, z_nominal_b;
+    nominal_stance_.at(RH) << -x_nominal_b,  -y_nominal_b, z_nominal_b;
+
+    max_dev_from_nominal_ << 0.15, 0.1, 0.10;
   }
-}
+};
 
+/**
+ * @brief The Dynamics of the quadruped robot ANYmal D.
+ */
+class AnymalDDynamicModel : public SingleRigidBodyDynamics {
+public:
+  AnymalDDynamicModel()
+  : SingleRigidBodyDynamics(51.6357,
+                    2.16338, 4.74784, 5.33977, -0.00175148, 0.0189325, -0.00190542,
+                    4) {}
+};
 
 } // namespace towr
 
-
+#endif /* TOWR_TOWR_ROS_INCLUDE_TOWR_ROS_ANYMAL_D_MODEL_H_ */
